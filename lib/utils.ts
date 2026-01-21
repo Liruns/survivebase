@@ -2,12 +2,20 @@
 
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { TAG_TRANSLATIONS } from './constants';
 
 /**
  * Merge Tailwind CSS classes with clsx
  */
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
+}
+
+/**
+ * Translate tag from English to Korean
+ */
+export function translateTag(tag: string): string {
+  return TAG_TRANSLATIONS[tag] || tag;
 }
 
 /**

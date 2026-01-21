@@ -1,6 +1,6 @@
 'use client';
 
-import { cn } from '@/lib/utils';
+import { cn, translateTag } from '@/lib/utils';
 import { CORE_TAGS } from '@/lib/constants';
 
 interface TagFilterProps {
@@ -33,7 +33,7 @@ export default function TagFilter({ selectedTags, onChange, className }: TagFilt
               onChange={() => handleToggle(tag)}
               className="w-4 h-4 rounded border-border bg-bg-tertiary text-accent focus:ring-accent focus:ring-offset-0"
             />
-            <span className="text-sm text-text-secondary">{tag}</span>
+            <span className="text-sm text-text-secondary">{translateTag(tag)}</span>
           </label>
         ))}
       </div>

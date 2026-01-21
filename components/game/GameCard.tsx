@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Game } from '@/types';
-import { formatPrice, getReviewLabel, getReviewVariant } from '@/lib/utils';
+import { formatPrice, getReviewLabel, getReviewVariant, translateTag } from '@/lib/utils';
 import ImageWithFallback from '../ui/ImageWithFallback';
 import Badge from '../ui/Badge';
 import BookmarkButton from './BookmarkButton';
@@ -44,7 +44,7 @@ export default function GameCard({ game }: GameCardProps) {
               <div className="flex flex-wrap gap-1">
                 {game.tags.slice(0, 3).map((tag) => (
                   <Badge key={tag} variant="outline" className="text-[9px] bg-bg-secondary/50">
-                    {tag}
+                    {translateTag(tag)}
                   </Badge>
                 ))}
               </div>

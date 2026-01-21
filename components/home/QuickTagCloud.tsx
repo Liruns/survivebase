@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { Game } from '@/types';
+import { translateTag } from '@/lib/utils';
 
 interface QuickTagCloudProps {
   games: Game[];
@@ -42,7 +43,7 @@ export default function QuickTagCloud({ games }: QuickTagCloudProps) {
                 transform: `scale(${0.9 + (count / maxCount) * 0.1})`,
               }}
             >
-              {tag}
+              {translateTag(tag)}
               <span className="ml-2 text-xs opacity-50 font-normal">{count}</span>
             </Link>
           );

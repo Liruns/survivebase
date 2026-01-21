@@ -8,7 +8,7 @@ import Badge from '@/components/ui/Badge';
 import ImageWithFallback from '@/components/ui/ImageWithFallback';
 import SimilarGames from '@/components/game/SimilarGames';
 import { RecentGameTracker, GameDetailBookmark, ScreenshotGallery, ShareButtons } from '@/components/game/GameDetailClient';
-import { formatPrice, getReviewLabel, getReviewVariant, getSteamUrl } from '@/lib/utils';
+import { formatPrice, getReviewLabel, getReviewVariant, getSteamUrl, translateTag } from '@/lib/utils';
 
 interface GamePageProps {
   params: Promise<{
@@ -173,7 +173,7 @@ export default async function GamePage({ params }: GamePageProps) {
               <div className="flex flex-wrap gap-2 mb-8">
                 {game.tags.slice(0, 8).map((tag) => (
                   <Badge key={tag} variant="outline" className="px-3 py-1 text-xs bg-bg-secondary/50 backdrop-blur-sm">
-                    {tag}
+                    {translateTag(tag)}
                   </Badge>
                 ))}
               </div>
