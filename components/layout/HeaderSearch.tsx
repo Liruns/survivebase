@@ -54,6 +54,28 @@ export default function HeaderSearch({ games }: HeaderSearchProps) {
   // Keyboard navigation
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsOpen(false);
+        return;
+      }
+
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        // If item selected via arrow keys, go to that item
+        if (selectedIndex >= 0 && results[selectedIndex]) {
+          router.push(`/game/${results[selectedIndex].appid}`);
+          setIsOpen(false);
+          setQuery('');
+        } 
+        // If no selection but has results, go to first result
+        else if (results.length > 0) {
+          router.push(`/game/${results[0].appid}`);
+          setIsOpen(false);
+          setQuery('');
+        }
+        return;
+      }
+
       if (!isOpen || results.length === 0) return;
 
       if (e.key === 'ArrowDown') {
@@ -62,38 +84,46 @@ export default function HeaderSearch({ games }: HeaderSearchProps) {
       } else if (e.key === 'ArrowUp') {
         e.preventDefault();
         setSelectedIndex((prev) => (prev > 0 ? prev - 1 : -1));
-      } else if (e.key === 'Enter') {
-        e.preventDefault();
-        if (selectedIndex >= 0 && results[selectedIndex]) {
-          router.push(`/game/${results[selectedIndex].appid}`);
-          setIsOpen(false);
-          setQuery('');
-        }
-      } else if (e.key === 'Escape') {
-        setIsOpen(false);
       }
     },
     [isOpen, results, selectedIndex, router]
   );
 
+  const handleSearch = useCallback(() => {
+    if (selectedIndex >= 0 && results[selectedIndex]) {
+      router.push(`/game/${results[selectedIndex].appid}`);
+    } else if (results.length > 0) {
+      router.push(`/game/${results[0].appid}`);
+    }
+    setIsOpen(false);
+    setQuery('');
+  }, [results, selectedIndex, router]);
+
   return (
     <div ref={containerRef} className="relative w-full">
       {/* Search Input */}
       <div className="relative">
-        <svg
-          className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth={2}
+        <button
+          type="button"
+          onClick={handleSearch}
+          className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary hover:text-accent transition-colors"
+          aria-label="검색"
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-          />
-        </svg>
+          <svg
+            className="w-4 h-4"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
+          </svg>
+        </button>
         <input
           ref={inputRef}
           type="text"
