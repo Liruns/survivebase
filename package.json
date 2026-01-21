@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "format": "prettier --write .",
-    "collect-data": "npx tsx scripts/collect-data.ts"
+    "collect-data": "npx tsx scripts/collect-data.ts",
+    "update-db": "npx tsx scripts/update-db.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.91.0",
