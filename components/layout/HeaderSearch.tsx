@@ -3,12 +3,19 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Game } from '@/types';
 import { formatPrice } from '@/lib/utils';
 import ImageWithFallback from '@/components/ui/ImageWithFallback';
 
+// Lightweight game data for search (reduces client bundle size)
+export interface SearchGame {
+  appid: number;
+  name: string;
+  headerImage: string;
+  priceFinal: number;
+}
+
 interface HeaderSearchProps {
-  games: Game[];
+  games: SearchGame[];
 }
 
 export default function HeaderSearch({ games }: HeaderSearchProps) {
@@ -169,7 +176,7 @@ export default function HeaderSearch({ games }: HeaderSearchProps) {
                         {game.name}
                       </p>
                       <p className="text-xs text-text-secondary">
-                        {formatPrice(game.price.final)}
+                        {formatPrice(game.priceFinal)}
                       </p>
                     </div>
                   </Link>

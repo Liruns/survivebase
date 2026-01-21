@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import Link from 'next/link';
 import Container from '@/components/layout/Container';
 import GameGrid from '@/components/game/GameGrid';
@@ -12,8 +12,18 @@ export default function BookmarksPage() {
   const { bookmarks, clear, count } = useBookmarks();
   const [games, setGames] = useState<Game[]>([]);
   const [loading, setLoading] = useState(true);
+  const prevBookmarksRef = useRef<string>('');
+
+  // Only fetch when bookmark IDs actually change (addition/removal, not order)
+  const bookmarkIds = useMemo(() => [...bookmarks].sort().join(','), [bookmarks]);
 
   useEffect(() => {
+    // Skip if bookmarks haven't changed (same set of IDs)
+    if (prevBookmarksRef.current === bookmarkIds) {
+      return;
+    }
+    prevBookmarksRef.current = bookmarkIds;
+
     async function loadGames() {
       if (bookmarks.length === 0) {
         setGames([]);
@@ -21,15 +31,12 @@ export default function BookmarksPage() {
         return;
       }
 
+      setLoading(true);
       try {
         // Fetch only bookmarked games (optimized)
         const response = await fetch(`/api/games?ids=${bookmarks.join(',')}`);
         if (response.ok) {
           const bookmarkedGames: Game[] = await response.json();
-          // Sort by bookmark order
-          bookmarkedGames.sort(
-            (a, b) => bookmarks.indexOf(a.appid) - bookmarks.indexOf(b.appid)
-          );
           setGames(bookmarkedGames);
         }
       } catch (error) {
@@ -41,7 +48,14 @@ export default function BookmarksPage() {
     }
 
     loadGames();
-  }, [bookmarks]);
+  }, [bookmarkIds, bookmarks]);
+
+  // Sort games by bookmark order (client-side, no re-fetch needed)
+  const sortedGames = useMemo(() => {
+    return [...games].sort(
+      (a, b) => bookmarks.indexOf(a.appid) - bookmarks.indexOf(b.appid)
+    );
+  }, [games, bookmarks]);
 
   return (
     <div className="py-10">
@@ -86,13 +100,13 @@ export default function BookmarksPage() {
           </div>
         </div>
 
-        {loading ? (
+      {loading ? (
           <div className="text-center py-20">
             <div className="inline-block w-8 h-8 border-4 border-accent border-t-transparent rounded-full animate-spin" />
             <p className="mt-4 text-text-secondary">불러오는 중...</p>
           </div>
-        ) : games.length > 0 ? (
-          <GameGrid games={games} />
+        ) : sortedGames.length > 0 ? (
+          <GameGrid games={sortedGames} />
         ) : (
           <div className="text-center py-20">
             <div className="w-16 h-16 mx-auto mb-6 text-text-secondary">

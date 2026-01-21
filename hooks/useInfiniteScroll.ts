@@ -21,15 +21,16 @@ export function useInfiniteScroll<T>({
 }: UseInfiniteScrollOptions<T>): UseInfiniteScrollReturn<T> {
   const [page, setPage] = useState(1);
   const loaderRef = useRef<HTMLDivElement | null>(null);
-  const prevItemsLengthRef = useRef(items.length);
+  const prevItemsRef = useRef(items);
 
-  // Reset page when items change significantly (filter applied)
+  // Reset page when items array changes (filter applied)
+  // Compare by reference since filtered arrays are always new
   useEffect(() => {
-    if (items.length !== prevItemsLengthRef.current) {
+    if (items !== prevItemsRef.current) {
       setPage(1);
-      prevItemsLengthRef.current = items.length;
+      prevItemsRef.current = items;
     }
-  }, [items.length]);
+  }, [items]);
 
   const visibleItems = items.slice(0, page * itemsPerPage);
   const hasMore = visibleItems.length < items.length;

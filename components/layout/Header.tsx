@@ -2,10 +2,18 @@ import Link from 'next/link';
 import { getGames } from '@/lib/cache';
 import Container from './Container';
 import ThemeToggle from '@/components/ui/ThemeToggle';
-import HeaderSearch from './HeaderSearch';
+import HeaderSearch, { type SearchGame } from './HeaderSearch';
 
 export default async function Header() {
   const games = await getGames();
+  
+  // Extract only necessary fields for search (reduces client payload significantly)
+  const searchGames: SearchGame[] = games.map((g) => ({
+    appid: g.appid,
+    name: g.name,
+    headerImage: g.headerImage,
+    priceFinal: g.price.final,
+  }));
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-bg-primary/80 backdrop-blur-md border-b border-border h-16 flex items-center">
@@ -16,7 +24,7 @@ export default async function Header() {
 
         {/* Desktop Search */}
         <div className="hidden md:block flex-1 max-w-md">
-          <HeaderSearch games={games} />
+          <HeaderSearch games={searchGames} />
         </div>
 
         <div className="flex items-center gap-3">
