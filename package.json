@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "format": "prettier --write .",
+    "clean": "npx rimraf .next out",
     "collect-data": "npx tsx scripts/collect-data.ts",
     "update-db": "npx tsx scripts/update-db.ts"
   },
