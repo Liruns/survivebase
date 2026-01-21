@@ -41,12 +41,9 @@ export async function GET(request: Request) {
     // Step 2: Fetch detailed info from Steam Store
     console.log('[Cron] Step 2: Fetching from Steam Store...');
     const appids = Array.from(steamSpyGames.keys());
+    console.log(`[Cron] Processing all ${appids.length} games`);
     
-    // Limit to avoid timeout (process in batches if needed)
-    const MAX_GAMES = 500; // Adjust based on timeout limits
-    const limitedAppids = appids.slice(0, MAX_GAMES);
-    
-    const steamStoreGames = await fetchSteamStoreGames(limitedAppids, (current, total) => {
+    const steamStoreGames = await fetchSteamStoreGames(appids, (current, total) => {
       if (current % 50 === 0) {
         console.log(`[Cron] Steam Store progress: ${current}/${total}`);
       }
