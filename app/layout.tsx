@@ -15,6 +15,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://survivebase.vercel.app'),
   title: {
     default: 'SurviveBase - 오픈월드 생존 건설 게임 큐레이션',
     template: '%s | SurviveBase',

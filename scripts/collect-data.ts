@@ -6,7 +6,9 @@
  * This script collects game data from SteamSpy and Steam Store APIs
  * and saves it to the cache file.
  *
- * Usage: npm run collect-data
+ * Usage:
+ *   npm run collect-data          # 전체 수집
+ *   npm run collect-data -- --test # 테스트 모드 (20개만 수집)
  */
 
 import { fetchGamesForTags } from '../lib/api/steamspy';
@@ -15,9 +17,16 @@ import { mergeAllGames } from '../lib/api/merger';
 import { writeGamesCache } from '../lib/cache';
 import { CORE_TAGS } from '../lib/constants';
 
+// 테스트 모드 설정
+const isTestMode = process.argv.includes('--test');
+const TEST_LIMIT = 20;
+
 async function main() {
   console.log('='.repeat(60));
   console.log('SurviveBase Data Collection');
+  if (isTestMode) {
+    console.log(`[TEST MODE] Limited to ${TEST_LIMIT} games`);
+  }
   console.log('='.repeat(60));
   console.log();
 
@@ -37,10 +46,17 @@ async function main() {
 
     // Step 2: Fetch detailed info from Steam Store
     console.log('Step 2: Fetching details from Steam Store...');
-    console.log('This may take a while due to rate limiting...');
+    if (!isTestMode) {
+      console.log('Using parallel processing (5 concurrent requests)...');
+    }
     console.log();
 
-    const appids = Array.from(steamSpyGames.keys());
+    const allAppids = Array.from(steamSpyGames.keys());
+    const appids = isTestMode ? allAppids.slice(0, TEST_LIMIT) : allAppids;
+
+    if (isTestMode) {
+      console.log(`[TEST MODE] Fetching ${appids.length} of ${allAppids.length} games`);
+    }
 
     const steamStoreGames = await fetchSteamStoreGames(appids, (current, total) => {
       const percent = Math.round((current / total) * 100);

@@ -16,13 +16,26 @@ interface GamePageProps {
   }>;
 }
 
-// Generate static params for SSG
+// Generate static params for top 100 games only (build optimization)
+// Remaining pages will be generated on-demand with ISR
 export async function generateStaticParams() {
   const games = await getGames();
-  return games.map((game) => ({
+  
+  // Sort by review score and take top 100 for static generation
+  const topGames = [...games]
+    .sort((a, b) => b.reviews.score - a.reviews.score)
+    .slice(0, 100);
+  
+  return topGames.map((game) => ({
     id: game.appid.toString(),
   }));
 }
+
+// Enable dynamic params for games not in generateStaticParams
+export const dynamicParams = true;
+
+// Revalidate game pages every 24 hours
+export const revalidate = 86400;
 
 // Generate dynamic metadata for each game
 export async function generateMetadata({ params }: GamePageProps): Promise<Metadata> {

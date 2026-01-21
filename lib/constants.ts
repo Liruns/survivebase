@@ -9,7 +9,11 @@ export const STEAM_STORE_API_URL = 'https://store.steampowered.com/api';
 
 // Rate Limits (in ms)
 export const STEAMSPY_RATE_LIMIT = 1000; // 1 request per second
-export const STEAM_STORE_RATE_LIMIT = 1000; // 1 request per second
+export const STEAM_STORE_RATE_LIMIT = 1000; // 1 request per second (순차 모드용, 폴백 시 사용)
+
+// Steam Store 병렬 처리 설정
+export const STEAM_STORE_CONCURRENCY = 3; // 동시 요청 수 (보수적)
+export const STEAM_STORE_REQUEST_DELAY = 350; // 요청 시작 간 딜레이 (ms)
 
 // Pagination
 export const GAMES_PER_PAGE = 24;
