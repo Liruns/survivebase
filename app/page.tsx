@@ -4,7 +4,6 @@ import Container from '@/components/layout/Container';
 import ClientGameList from '@/components/game/ClientGameList';
 import GameCardSkeleton from '@/components/game/GameCardSkeleton';
 import FeaturedSlider from '@/components/home/FeaturedSlider';
-import StatsBar from '@/components/home/StatsBar';
 import QuickTagCloud from '@/components/home/QuickTagCloud';
 import SaleGamesSection from '@/components/home/SaleGamesSection';
 
@@ -36,9 +35,6 @@ export default async function HomePage() {
       <Container>
         {/* Featured Games Slider */}
         <FeaturedSlider games={featuredGames} />
-
-        {/* Site Statistics Bar */}
-        <StatsBar games={games} />
         
         {/* Hero Section with gradient background */}
         <section className="mb-12 text-center md:text-left relative py-12 -mx-4 px-4 rounded-2xl bg-gradient-to-br from-bg-primary via-bg-secondary/50 to-bg-tertiary/30 border border-border/30 overflow-hidden">

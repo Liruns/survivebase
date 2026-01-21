@@ -81,6 +81,27 @@ export async function fetchGamesFromDB(): Promise<Game[]> {
 }
 
 /**
+ * Fetch multiple games by appids
+ */
+export async function fetchGamesByIdsFromDB(appids: number[]): Promise<Game[]> {
+  if (!isSupabaseConfigured() || !supabase || appids.length === 0) {
+    return [];
+  }
+
+  const { data, error } = await supabase
+    .from('games')
+    .select('*')
+    .in('appid', appids);
+
+  if (error) {
+    console.error('Error fetching games by IDs:', error);
+    return [];
+  }
+
+  return (data || []).map(rowToGame);
+}
+
+/**
  * Fetch a single game by appid
  */
 export async function fetchGameByIdFromDB(appid: number): Promise<Game | null> {

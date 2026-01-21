@@ -19,14 +19,44 @@ export const STEAM_STORE_REQUEST_DELAY = 800; // 요청 간 0.8초 딜레이
 export const GAMES_PER_PAGE = 24;
 
 // Core Tags for data collection (한글 - Steam API cc=kr)
+// 생존 건설/크래프팅 게임에 특화된 태그
 export const CORE_TAGS = [
   '생존',
   '오픈 월드',
   '건설',
+  '크래프팅',
+  '기지 건설',
   '샌드박스',
-  '시뮬레이션',
-  '전략',
   '자원 관리',
+] as const;
+
+// Required tags - 게임이 최소 하나 이상 가져야 포함됨
+// (생존 태그만으로는 배틀로얄도 포함되므로 크래프팅/건설 태그 필수)
+export const REQUIRED_TAGS = [
+  '크래프팅',
+  'Crafting',
+  '기지 건설',
+  'Base Building',
+  '건설',
+  'Building',
+  '자원 관리',
+  '자동화',
+  'Automation',
+] as const;
+
+// Excluded tags - 이 태그가 있으면 제외
+export const EXCLUDED_TAGS = [
+  '배틀 로얄',
+  'Battle Royale',
+  'MOBA',
+  '카드 게임',
+  'Card Game',
+  '스포츠',
+  'Sports',
+  '레이싱',
+  'Racing',
+  '격투',
+  'Fighting',
 ] as const;
 
 // Secondary Tags for filtering (한글 - Steam API cc=kr)

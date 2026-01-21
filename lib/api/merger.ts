@@ -4,6 +4,7 @@ import type { Game } from '@/types';
 import type { SteamSpyGame } from './steamspy';
 import type { SteamStoreGame } from './steamstore';
 import { calculateReviewScore } from '@/lib/utils';
+import { REQUIRED_TAGS, EXCLUDED_TAGS } from '@/lib/constants';
 
 /**
  * Merge SteamSpy and Steam Store data into a unified Game object
@@ -69,18 +70,52 @@ export function mergeGameData(
 }
 
 /**
+ * Check if a game should be included based on tags
+ * - Must have at least one required tag (crafting, building, etc.)
+ * - Must NOT have any excluded tags (battle royale, MOBA, etc.)
+ */
+function shouldIncludeGame(tags: string[]): boolean {
+  const tagsLower = tags.map(t => t.toLowerCase());
+  
+  // Check for excluded tags
+  const hasExcludedTag = EXCLUDED_TAGS.some(excluded => 
+    tagsLower.some(tag => tag.includes(excluded.toLowerCase()))
+  );
+  if (hasExcludedTag) return false;
+  
+  // Check for at least one required tag
+  const hasRequiredTag = REQUIRED_TAGS.some(required =>
+    tagsLower.some(tag => tag.includes(required.toLowerCase()))
+  );
+  
+  return hasRequiredTag;
+}
+
+/**
  * Merge maps of SteamSpy and Steam Store games
+ * Filters out games that don't match the survival/crafting genre
  */
 export function mergeAllGames(
   steamSpyGames: Map<number, SteamSpyGame>,
   steamStoreGames: Map<number, SteamStoreGame>
 ): Game[] {
   const games: Game[] = [];
+  let filtered = 0;
 
   for (const [appid, steamSpyGame] of steamSpyGames) {
+    // Filter based on tags
+    if (!shouldIncludeGame(steamSpyGame.tags)) {
+      filtered++;
+      continue;
+    }
+    
     const steamStoreGame = steamStoreGames.get(appid) || null;
     const mergedGame = mergeGameData(steamSpyGame, steamStoreGame);
     games.push(mergedGame);
+  }
+
+  if (filtered > 0) {
+    console.log(`Filtered out ${filtered} games (missing required tags or has excluded tags)`);
   }
 
   return games;

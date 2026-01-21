@@ -67,9 +67,9 @@ export default function HeaderSearch({ games }: HeaderSearchProps) {
           setIsOpen(false);
           setQuery('');
         } 
-        // If no selection but has results, go to first result
-        else if (results.length > 0) {
-          router.push(`/game/${results[0].appid}`);
+        // Otherwise go to search results page
+        else if (query.trim()) {
+          router.push(`/search?q=${encodeURIComponent(query.trim())}`);
           setIsOpen(false);
           setQuery('');
         }
@@ -92,12 +92,12 @@ export default function HeaderSearch({ games }: HeaderSearchProps) {
   const handleSearch = useCallback(() => {
     if (selectedIndex >= 0 && results[selectedIndex]) {
       router.push(`/game/${results[selectedIndex].appid}`);
-    } else if (results.length > 0) {
-      router.push(`/game/${results[0].appid}`);
+    } else if (query.trim()) {
+      router.push(`/search?q=${encodeURIComponent(query.trim())}`);
     }
     setIsOpen(false);
     setQuery('');
-  }, [results, selectedIndex, router]);
+  }, [query, results, selectedIndex, router]);
 
   return (
     <div ref={containerRef} className="relative w-full">

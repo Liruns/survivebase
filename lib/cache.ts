@@ -5,7 +5,8 @@ import path from 'path';
 import type { Game } from '@/types';
 import { 
   fetchGamesFromDB, 
-  fetchGameByIdFromDB 
+  fetchGameByIdFromDB,
+  fetchGamesByIdsFromDB 
 } from '@/lib/supabase/queries';
 import { isSupabaseConfigured } from '@/lib/supabase/client';
 
@@ -152,6 +153,29 @@ export async function getGameById(appid: number): Promise<Game | null> {
   // Fallback to full list search
   const games = await getGames();
   return games.find((game) => game.appid === appid) || null;
+}
+
+/**
+ * Get games by IDs (optimized for bookmarks)
+ */
+export async function getGamesByIds(appids: number[]): Promise<Game[]> {
+  if (appids.length === 0) return [];
+
+  // Try Supabase first
+  if (isSupabaseConfigured()) {
+    try {
+      const games = await fetchGamesByIdsFromDB(appids);
+      if (games.length > 0) {
+        return games;
+      }
+    } catch (error) {
+      console.warn('Failed to fetch games by IDs from Supabase:', error);
+    }
+  }
+
+  // Fallback to full list filter
+  const allGames = await getGames();
+  return allGames.filter((game) => appids.includes(game.appid));
 }
 
 /**
