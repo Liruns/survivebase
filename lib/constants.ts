@@ -18,16 +18,16 @@ export const STEAM_STORE_REQUEST_DELAY = 800; // 요청 간 0.8초 딜레이
 // Pagination
 export const GAMES_PER_PAGE = 24;
 
-// Core Tags for data collection (한글 - Steam API cc=kr)
+// Core Tags for data collection (English - SteamSpy API requires English tags)
 // 생존 건설/크래프팅 게임에 특화된 태그
 export const CORE_TAGS = [
-  '생존',
-  '오픈 월드',
-  '건설',
-  '크래프팅',
-  '기지 건설',
-  '샌드박스',
-  '자원 관리',
+  'Survival',
+  'Open World',
+  'Building',
+  'Crafting',
+  'Base Building',
+  'Sandbox',
+  'Resource Management',
 ] as const;
 
 // Required tags - 게임이 최소 하나 이상 가져야 포함됨
