@@ -111,6 +111,16 @@ body {
   min-height: 100vh;
 }
 
+/* Theme transition - 주요 컨테이너만 전환 */
+body,
+header,
+main,
+footer,
+aside,
+nav {
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
 /* Scrollbar Styling */
 ::-webkit-scrollbar {
   width: 10px;
