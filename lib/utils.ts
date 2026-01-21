@@ -12,10 +12,12 @@ export function cn(...inputs: ClassValue[]) {
 
 /**
  * Format price in KRW
+ * Steam API returns KRW in cents (price * 100), so we divide by 100
  */
 export function formatPrice(price: number): string {
   if (price === 0) return '무료';
-  return `₩${price.toLocaleString('ko-KR')}`;
+  const actualPrice = Math.round(price / 100);
+  return `₩${actualPrice.toLocaleString('ko-KR')}`;
 }
 
 /**
