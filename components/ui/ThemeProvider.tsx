@@ -14,6 +14,7 @@ export default function ThemeProvider({ children }: ThemeProviderProps) {
       enableSystem={false}
       storageKey="survivebase-theme"
       value={{ dark: 'dark', light: 'light' }}
+      disableTransitionOnChange
     >
       {children}
     </NextThemesProvider>
