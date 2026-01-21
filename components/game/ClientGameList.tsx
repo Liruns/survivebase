@@ -144,7 +144,7 @@ export default function ClientGameList({ initialGames }: ClientGameListProps) {
         if (filters.priceRange === 'free') {
           return game.price.isFree;
         }
-        const price = game.price.final;
+        const price = Math.round(game.price.final / 100); // DB값을 원화로 변환
         return price >= range.min && price <= range.max;
       });
     }

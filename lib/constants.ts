@@ -12,38 +12,37 @@ export const STEAMSPY_RATE_LIMIT = 1000; // 1 request per second
 export const STEAM_STORE_RATE_LIMIT = 1000; // 1 request per second (순차 모드용, 폴백 시 사용)
 
 // Steam Store 병렬 처리 설정
-export const STEAM_STORE_CONCURRENCY = 3; // 동시 요청 수 (보수적)
-export const STEAM_STORE_REQUEST_DELAY = 350; // 요청 시작 간 딜레이 (ms)
+export const STEAM_STORE_CONCURRENCY = 2; // 동시 2개
+export const STEAM_STORE_REQUEST_DELAY = 800; // 요청 간 0.8초 딜레이
 
 // Pagination
 export const GAMES_PER_PAGE = 24;
 
-// Core Tags for data collection
+// Core Tags for data collection (한글 - Steam API cc=kr)
 export const CORE_TAGS = [
-  'Survival',
-  'Open World',
-  'Open World Survival Craft',
-  'Base Building',
-  'Crafting',
-  'Building',
-  'Sandbox',
-  'Automation',
-  'Resource Management',
+  '생존',
+  '오픈 월드',
+  '건설',
+  '샌드박스',
+  '시뮬레이션',
+  '전략',
+  '자원 관리',
 ] as const;
 
-// Secondary Tags for filtering
+// Secondary Tags for filtering (한글 - Steam API cc=kr)
 export const SECONDARY_TAGS = [
-  'Multiplayer',
-  'Co-op',
-  'Online Co-Op',
-  'Singleplayer',
-  'Post-apocalyptic',
-  'Zombies',
-  'Exploration',
-  'Voxel',
+  '멀티플레이어',
+  '협동',
+  '온라인 협동',
+  '싱글 플레이어',
+  '좀비',
+  '탐험',
   'PvP',
   'FPS',
-  'Shooter',
+  '액션',
+  '어드벤처',
+  '인디',
+  'RPG',
 ] as const;
 
 // Price Ranges (KRW)
