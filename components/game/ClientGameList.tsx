@@ -177,7 +177,7 @@ export default function ClientGameList({ initialGames }: ClientGameListProps) {
     <div className="flex flex-col lg:flex-row gap-8">
       {/* Sidebar */}
       <div className="lg:w-64 lg:flex-shrink-0">
-        <div className="lg:sticky lg:top-24">
+        <div className="lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto">
           <FilterSidebar
             filters={filters}
             onSearchChange={handleSearchChange}

@@ -9,19 +9,20 @@ const supabase = createClient(
 );
 
 async function check() {
-  // 태그 확인
-  const { data: tagData } = await supabase
+  // 특정 게임 확인
+  const appid = process.argv[2] ? parseInt(process.argv[2]) : 771870;
+  
+  const { data, error } = await supabase
     .from('games')
-    .select('name, tags')
-    .not('tags', 'eq', '{}')
-    .limit(5);
+    .select('appid, name')
+    .eq('appid', appid)
+    .single();
 
-  console.log('=== DB 태그 값 ===\n');
-  tagData?.forEach(g => {
-    console.log(`${g.name}`);
-    console.log(`  tags: ${JSON.stringify(g.tags)}`);
-    console.log();
-  });
+  if (error) {
+    console.log(`appid ${appid} 게임 없음:`, error.message);
+  } else {
+    console.log(`appid ${appid} 게임 있음:`, data);
+  }
 }
 
 check();

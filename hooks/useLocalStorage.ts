@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 export function useLocalStorage<T>(
   key: string,
   initialValue: T
 ): [T, (value: T | ((prev: T) => T)) => void] {
-  // State to store our value
+  // Use ref to always have the latest value for functional updates
+  const valueRef = useRef<T>(initialValue);
   const [storedValue, setStoredValue] = useState<T>(initialValue);
   const [isInitialized, setIsInitialized] = useState(false);
 
@@ -17,7 +18,9 @@ export function useLocalStorage<T>(
     try {
       const item = window.localStorage.getItem(key);
       if (item) {
-        setStoredValue(JSON.parse(item));
+        const parsed = JSON.parse(item);
+        valueRef.current = parsed;
+        setStoredValue(parsed);
       }
     } catch (error) {
       console.warn(`Error reading localStorage key "${key}":`, error);
@@ -25,13 +28,19 @@ export function useLocalStorage<T>(
     setIsInitialized(true);
   }, [key]);
 
+  // Keep ref in sync
+  useEffect(() => {
+    valueRef.current = storedValue;
+  }, [storedValue]);
+
   // Return a wrapped version of useState's setter function that
   // persists the new value to localStorage.
   const setValue = useCallback(
     (value: T | ((prev: T) => T)) => {
       try {
-        // Allow value to be a function so we have the same API as useState
-        const valueToStore = value instanceof Function ? value(storedValue) : value;
+        // Always use the latest value from ref for functional updates
+        const valueToStore = value instanceof Function ? value(valueRef.current) : value;
+        valueRef.current = valueToStore;
         setStoredValue(valueToStore);
 
         if (typeof window !== 'undefined') {
@@ -41,7 +50,7 @@ export function useLocalStorage<T>(
         console.warn(`Error setting localStorage key "${key}":`, error);
       }
     },
-    [key, storedValue]
+    [key]
   );
 
   return [isInitialized ? storedValue : initialValue, setValue];

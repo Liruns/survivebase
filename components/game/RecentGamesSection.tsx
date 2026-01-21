@@ -24,11 +24,11 @@ export default function RecentGamesSection({ allGames }: RecentGamesSectionProps
     return null;
   }
 
-  // Get recent game data
+  // Get recent game data (최대 5개)
   const recentGameData = recentGames
     .map((appid) => allGames.find((g) => g.appid === appid))
     .filter((g): g is Game => g !== undefined)
-    .slice(0, 10);
+    .slice(0, 5);
 
   if (recentGameData.length === 0) {
     return null;

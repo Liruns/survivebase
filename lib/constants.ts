@@ -71,4 +71,4 @@ export const STORAGE_KEYS = {
 
 // Limits
 export const MAX_BOOKMARKS = 100;
-export const MAX_RECENT_GAMES = 10;
+export const MAX_RECENT_GAMES = 5;

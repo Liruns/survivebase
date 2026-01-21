@@ -1,30 +1,19 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useTheme } from 'next-themes';
+import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 
 export default function ThemeToggle({ className }: { className?: string }) {
-  const [isDark, setIsDark] = useState(true);
+  const { theme, setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-    // Check current theme
-    const isDarkMode = !document.documentElement.classList.contains('light');
-    setIsDark(isDarkMode);
   }, []);
 
   const toggleTheme = () => {
-    const newIsDark = !isDark;
-    setIsDark(newIsDark);
-
-    if (newIsDark) {
-      document.documentElement.classList.remove('light');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.documentElement.classList.add('light');
-      localStorage.setItem('theme', 'light');
-    }
+    setTheme(resolvedTheme === 'dark' ? 'light' : 'dark');
   };
 
   // Prevent hydration mismatch
@@ -35,6 +24,8 @@ export default function ThemeToggle({ className }: { className?: string }) {
       </button>
     );
   }
+
+  const isDark = resolvedTheme === 'dark';
 
   return (
     <button
