@@ -1,17 +1,18 @@
 import { NextResponse } from 'next/server';
-import { fetchGamesForTags } from '@/lib/api/steamspy';
 import { fetchSteamStoreGames } from '@/lib/api/steamstore';
-import { mergeAllGames } from '@/lib/api/merger';
 import { upsertGamesToDB } from '@/lib/supabase/queries';
-import { CORE_TAGS } from '@/lib/constants';
+import { fetchOldestGameAppids } from '@/lib/supabase/queries';
 
 // Vercel Cron requires specific runtime
 export const runtime = 'nodejs';
-export const maxDuration = 300; // 5 minutes max
+export const maxDuration = 60; // 1 minute max (runs every minute)
+
+const BATCH_SIZE = 30; // Process 30 games per minute
 
 /**
- * Cron job for daily data collection
- * Triggered by Vercel Cron at UTC 00:00 (KST 09:00)
+ * Cron job for incremental data collection
+ * Runs every minute, updates 30 oldest games
+ * Full cycle: ~19,000 games / 30 per min = ~633 min = ~10.5 hours
  */
 export async function GET(request: Request) {
   const startTime = Date.now();
@@ -20,69 +21,76 @@ export async function GET(request: Request) {
   const authHeader = request.headers.get('authorization');
   const cronSecret = process.env.CRON_SECRET;
   
-  // In production, verify CRON_SECRET
   if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
     console.error('[Cron] Unauthorized request');
     return new Response('Unauthorized', { status: 401 });
   }
 
-  console.log('[Cron] Data collection started at', new Date().toISOString());
+  console.log('[Cron] Incremental update started at', new Date().toISOString());
 
   try {
-    // Step 1: Fetch games from SteamSpy for all core tags
-    console.log('[Cron] Step 1: Fetching from SteamSpy...');
-    const steamSpyGames = await fetchGamesForTags([...CORE_TAGS]);
-    console.log(`[Cron] Found ${steamSpyGames.size} unique games from SteamSpy`);
-
-    if (steamSpyGames.size === 0) {
-      throw new Error('No games fetched from SteamSpy');
+    // Step 1: Get oldest 30 games from DB
+    console.log(`[Cron] Fetching ${BATCH_SIZE} oldest games from DB...`);
+    const appids = await fetchOldestGameAppids(BATCH_SIZE);
+    
+    if (appids.length === 0) {
+      console.log('[Cron] No games to update');
+      return NextResponse.json({
+        success: true,
+        message: 'No games to update',
+        stats: { processed: 0 },
+        timestamp: new Date().toISOString(),
+      });
     }
 
-    // Step 2: Fetch detailed info from Steam Store
-    console.log('[Cron] Step 2: Fetching from Steam Store...');
-    const appids = Array.from(steamSpyGames.keys());
-    console.log(`[Cron] Processing all ${appids.length} games`);
-    
-    const steamStoreGames = await fetchSteamStoreGames(appids, (current, total) => {
-      if (current % 50 === 0) {
-        console.log(`[Cron] Steam Store progress: ${current}/${total}`);
-      }
-    });
+    console.log(`[Cron] Updating games: ${appids.slice(0, 5).join(', ')}... (${appids.length} total)`);
+
+    // Step 2: Fetch fresh data from Steam Store
+    const steamStoreGames = await fetchSteamStoreGames(appids);
     console.log(`[Cron] Fetched ${steamStoreGames.size} games from Steam Store`);
 
-    // Step 3: Merge data
-    console.log('[Cron] Step 3: Merging data...');
-    const games = mergeAllGames(steamSpyGames, steamStoreGames);
-    console.log(`[Cron] Merged ${games.length} games`);
+    // Step 3: Convert to Game format and upsert
+    const games = Array.from(steamStoreGames.values()).map((storeGame) => ({
+      appid: storeGame.appid,
+      name: storeGame.name,
+      description: storeGame.description,
+      headerImage: storeGame.headerImage,
+      screenshots: storeGame.screenshots,
+      price: storeGame.price,
+      reviews: { positive: 0, negative: 0, score: 0 }, // Will be preserved from existing data
+      releaseDate: storeGame.releaseDate,
+      tags: storeGame.genres,
+      categories: storeGame.categories,
+      owners: '',
+      playtime: 0,
+      updatedAt: new Date().toISOString(),
+    }));
 
-    // Step 4: Upsert to Supabase
-    console.log('[Cron] Step 4: Upserting to database...');
+    // Step 4: Upsert to Supabase (this updates updated_at automatically)
     const upsertedCount = await upsertGamesToDB(games);
 
-    // Summary
     const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
-    console.log(`[Cron] Collection complete! ${upsertedCount} games in ${elapsed}s`);
+    console.log(`[Cron] Updated ${upsertedCount} games in ${elapsed}s`);
 
     return NextResponse.json({
       success: true,
-      message: 'Data collection completed',
+      message: 'Incremental update completed',
       stats: {
-        steamSpyGames: steamSpyGames.size,
-        steamStoreGames: steamStoreGames.size,
-        mergedGames: games.length,
-        upsertedGames: upsertedCount,
+        requested: appids.length,
+        fetched: steamStoreGames.size,
+        upserted: upsertedCount,
         elapsedSeconds: parseFloat(elapsed),
       },
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
     const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
-    console.error(`[Cron] Data collection failed after ${elapsed}s:`, error);
+    console.error(`[Cron] Update failed after ${elapsed}s:`, error);
     
     return NextResponse.json(
       {
         success: false,
-        message: 'Data collection failed',
+        message: 'Update failed',
         error: error instanceof Error ? error.message : 'Unknown error',
         elapsedSeconds: parseFloat(elapsed),
       },

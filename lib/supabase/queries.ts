@@ -181,6 +181,30 @@ export async function upsertGamesToDB(games: Game[]): Promise<number> {
 }
 
 /**
+ * Fetch oldest updated games (for incremental cron updates)
+ * Returns appids of games with oldest updated_at timestamp
+ */
+export async function fetchOldestGameAppids(limit: number = 30): Promise<number[]> {
+  if (!isSupabaseConfigured() || !supabase) {
+    return [];
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase as any)
+    .from('games')
+    .select('appid')
+    .order('updated_at', { ascending: true })
+    .limit(limit);
+
+  if (error) {
+    console.error('Error fetching oldest games:', error);
+    return [];
+  }
+
+  return (data || []).map((row: { appid: number }) => row.appid);
+}
+
+/**
  * Get database stats
  */
 export async function getDBStats(): Promise<{
