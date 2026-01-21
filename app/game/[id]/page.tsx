@@ -1,12 +1,13 @@
 import { getGameById, getGames } from '@/lib/cache';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import type { Metadata } from 'next';
 import Container from '@/components/layout/Container';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import ImageWithFallback from '@/components/ui/ImageWithFallback';
 import SimilarGames from '@/components/game/SimilarGames';
-import { RecentGameTracker, GameDetailBookmark, ScreenshotGallery } from '@/components/game/GameDetailClient';
+import { RecentGameTracker, GameDetailBookmark, ScreenshotGallery, ShareButtons } from '@/components/game/GameDetailClient';
 import { formatPrice, getReviewLabel, getReviewVariant, getSteamUrl } from '@/lib/utils';
 
 interface GamePageProps {
@@ -21,6 +22,45 @@ export async function generateStaticParams() {
   return games.map((game) => ({
     id: game.appid.toString(),
   }));
+}
+
+// Generate dynamic metadata for each game
+export async function generateMetadata({ params }: GamePageProps): Promise<Metadata> {
+  const resolvedParams = await params;
+  const gameId = parseInt(resolvedParams.id);
+  const game = await getGameById(gameId);
+
+  if (!game) {
+    return {
+      title: '게임을 찾을 수 없습니다',
+    };
+  }
+
+  const description = game.description?.slice(0, 160) || `${game.name} - SurviveBase에서 확인하세요`;
+  const ogImageUrl = `/api/og?title=${encodeURIComponent(game.name)}&description=${encodeURIComponent(description)}&image=${encodeURIComponent(game.headerImage)}&price=${encodeURIComponent(formatPrice(game.price.final))}&score=${game.reviews.score}`;
+
+  return {
+    title: game.name,
+    description,
+    openGraph: {
+      title: game.name,
+      description,
+      images: [
+        {
+          url: ogImageUrl,
+          width: 1200,
+          height: 630,
+          alt: game.name,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: game.name,
+      description,
+      images: [ogImageUrl],
+    },
+  };
 }
 
 export default async function GamePage({ params }: GamePageProps) {
@@ -38,8 +78,42 @@ export default async function GamePage({ params }: GamePageProps) {
 
   const hasDiscount = game.price.discountPercent > 0;
 
+  // JSON-LD structured data for SEO
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'VideoGame',
+    name: game.name,
+    description: game.description,
+    image: game.headerImage,
+    url: `https://survivebase.vercel.app/game/${game.appid}`,
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: game.reviews.score,
+      bestRating: 100,
+      worstRating: 0,
+      ratingCount: 1000, // Estimated count
+    },
+    offers: {
+      '@type': 'Offer',
+      price: game.price.final / 100,
+      priceCurrency: 'KRW',
+      availability: 'https://schema.org/InStock',
+      url: getSteamUrl(game.appid),
+    },
+    datePublished: game.releaseDate,
+    genre: game.tags.slice(0, 5),
+    gamePlatform: 'PC',
+    applicationCategory: 'Game',
+  };
+
   return (
     <div className="pb-20">
+      {/* JSON-LD Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      
       {/* Track recent game view */}
       <RecentGameTracker appid={game.appid} />
       
@@ -195,6 +269,15 @@ export default async function GamePage({ params }: GamePageProps) {
                     </Button>
                   </a>
                   <GameDetailBookmark appid={game.appid} />
+                </div>
+
+                {/* Share Buttons */}
+                <div className="pt-6 border-t border-white/10">
+                  <h3 className="text-xs text-text-secondary font-medium mb-3">공유하기</h3>
+                  <ShareButtons 
+                    title={game.name} 
+                    url={`https://survivebase.vercel.app/game/${game.appid}`} 
+                  />
                 </div>
               </div>
             </div>

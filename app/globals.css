@@ -111,23 +111,35 @@ body {
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-/* Scrollbar Styling (Dark Theme) */
+/* Scrollbar Styling */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
   background: var(--bg-secondary);
+  border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--bg-tertiary);
-  border-radius: 4px;
+  background: linear-gradient(180deg, var(--bg-tertiary) 0%, var(--border) 100%);
+  border-radius: 5px;
+  border: 2px solid var(--bg-secondary);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--text-secondary);
+  background: linear-gradient(180deg, var(--text-secondary) 0%, var(--bg-tertiary) 100%);
+}
+
+::-webkit-scrollbar-corner {
+  background: var(--bg-secondary);
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--bg-tertiary) var(--bg-secondary);
 }
 
 /* Focus Styles for Accessibility */
@@ -161,4 +173,20 @@ body {
 .animate-fade-in-up-delay {
   animation: fadeInUp 0.6s ease-out 0.2s forwards;
   opacity: 0;
+}
+
+/* Ripple Animation */
+@keyframes ripple {
+  from {
+    transform: scale(0);
+    opacity: 1;
+  }
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+.animate-ripple {
+  animation: ripple 0.6s ease-out forwards;
 }

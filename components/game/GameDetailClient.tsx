@@ -177,3 +177,91 @@ export function ScreenshotGallery({ screenshots, gameName }: ScreenshotGalleryPr
     </>
   );
 }
+
+interface ShareButtonsProps {
+  title: string;
+  url: string;
+}
+
+export function ShareButtons({ title, url }: ShareButtonsProps) {
+  const encodedTitle = encodeURIComponent(title);
+  const encodedUrl = encodeURIComponent(url);
+
+  const shareLinks = [
+    {
+      name: 'Twitter',
+      href: `https://twitter.com/intent/tweet?text=${encodedTitle}&url=${encodedUrl}`,
+      icon: (
+        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+        </svg>
+      ),
+      color: 'hover:bg-[#1DA1F2]/20 hover:text-[#1DA1F2]',
+    },
+    {
+      name: 'Facebook',
+      href: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
+      icon: (
+        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+        </svg>
+      ),
+      color: 'hover:bg-[#1877F2]/20 hover:text-[#1877F2]',
+    },
+    {
+      name: 'KakaoTalk',
+      href: `https://story.kakao.com/share?url=${encodedUrl}`,
+      icon: (
+        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 3c5.799 0 10.5 3.664 10.5 8.185 0 4.52-4.701 8.184-10.5 8.184a13.5 13.5 0 0 1-1.727-.11l-4.408 2.883c-.501.265-.678.236-.472-.413l.892-3.678c-2.88-1.46-4.785-3.99-4.785-6.866C1.5 6.664 6.201 3 12 3z" />
+        </svg>
+      ),
+      color: 'hover:bg-[#FEE500]/20 hover:text-[#3C1E1E]',
+    },
+    {
+      name: 'Copy Link',
+      href: '#',
+      icon: (
+        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+        </svg>
+      ),
+      color: 'hover:bg-accent/20 hover:text-accent',
+      onClick: async (e: React.MouseEvent) => {
+        e.preventDefault();
+        try {
+          await navigator.clipboard.writeText(url);
+          alert('링크가 복사되었습니다!');
+        } catch {
+          // Fallback for older browsers
+          const textArea = document.createElement('textarea');
+          textArea.value = url;
+          document.body.appendChild(textArea);
+          textArea.select();
+          document.execCommand('copy');
+          document.body.removeChild(textArea);
+          alert('링크가 복사되었습니다!');
+        }
+      },
+    },
+  ];
+
+  return (
+    <div className="flex gap-2">
+      {shareLinks.map((link) => (
+        <a
+          key={link.name}
+          href={link.href}
+          onClick={link.onClick}
+          target={link.onClick ? undefined : '_blank'}
+          rel={link.onClick ? undefined : 'noopener noreferrer'}
+          className={`w-10 h-10 rounded-lg bg-bg-tertiary flex items-center justify-center text-text-secondary transition-colors ${link.color}`}
+          aria-label={`${link.name}에 공유하기`}
+        >
+          {link.icon}
+        </a>
+      ))}
+    </div>
+  );
+}
