@@ -11,9 +11,9 @@ export default function ThemeProvider({ children }: ThemeProviderProps) {
     <NextThemesProvider
       attribute="class"
       defaultTheme="dark"
-      enableSystem
-      disableTransitionOnChange={false}
-      value={{ dark: '', light: 'light' }}
+      enableSystem={false}
+      storageKey="survivebase-theme"
+      value={{ dark: 'dark', light: 'light' }}
     >
       {children}
     </NextThemesProvider>

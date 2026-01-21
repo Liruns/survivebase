@@ -54,7 +54,7 @@ export default function GameCard({ game }: GameCardProps) {
 
         {/* Content */}
         <div className="p-4 flex flex-col flex-grow gap-3">
-          <h3 className="font-bold text-text-primary line-clamp-2 leading-snug group-hover:text-accent transition-colors">
+          <h3 className="font-bold text-text-primary line-clamp-2 leading-snug min-h-[2.5rem] group-hover:text-accent transition-colors">
             {game.name}
           </h3>
 

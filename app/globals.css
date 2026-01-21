@@ -3,7 +3,8 @@
 /* SurviveBase - Dark Gaming Theme */
 
 /* Dark Mode (Default) */
-:root {
+:root,
+.dark {
   --bg-primary: #0d1117;
   --bg-secondary: #161b22;
   --bg-tertiary: #21262d;
