@@ -5,14 +5,15 @@ import { fetchOldestGameAppids } from '@/lib/supabase/queries';
 
 // Vercel Cron requires specific runtime
 export const runtime = 'nodejs';
-export const maxDuration = 60; // 1 minute max (runs every minute)
+export const maxDuration = 10; // Hobby plan: 10 second limit
 
-const BATCH_SIZE = 30; // Process 30 games per minute
+const BATCH_SIZE = 50; // Process 50 games per day (Hobby: 1 cron/day)
 
 /**
  * Cron job for incremental data collection
- * Runs every minute, updates 30 oldest games
- * Full cycle: ~19,000 games / 30 per min = ~633 min = ~10.5 hours
+ * Vercel Hobby Plan: Runs once per day at 00:00 UTC
+ * Updates oldest games in DB with fresh Steam Store data
+ * Full cycle: ~19,000 games / 50 per day = ~380 days
  */
 export async function GET(request: Request) {
   const startTime = Date.now();
@@ -26,10 +27,10 @@ export async function GET(request: Request) {
     return new Response('Unauthorized', { status: 401 });
   }
 
-  console.log('[Cron] Incremental update started at', new Date().toISOString());
+  console.log('[Cron] Daily update started at', new Date().toISOString());
 
   try {
-    // Step 1: Get oldest 30 games from DB
+    // Step 1: Get oldest games from DB (limited by Hobby plan timeout)
     console.log(`[Cron] Fetching ${BATCH_SIZE} oldest games from DB...`);
     const appids = await fetchOldestGameAppids(BATCH_SIZE);
     

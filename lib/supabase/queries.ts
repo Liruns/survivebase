@@ -133,6 +133,7 @@ export async function upsertGamesToDB(games: Game[]): Promise<number> {
   }
 
   // Convert Game[] to database format
+  const now = new Date().toISOString();
   const rows: GameInsert[] = games.map((game) => ({
     appid: game.appid,
     name: game.name,
@@ -153,6 +154,7 @@ export async function upsertGamesToDB(games: Game[]): Promise<number> {
     multiplayer: game.categories.multiplayer,
     coop: game.categories.coop,
     tags: game.tags || [],
+    updated_at: now, // 명시적으로 갱신하여 다음 cron에서 다른 게임 선택되도록
   }));
 
   // Batch upsert in chunks of 100

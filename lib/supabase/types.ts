@@ -47,6 +47,7 @@ export interface Database {
           multiplayer?: boolean;
           coop?: boolean;
           tags?: string[];
+          updated_at?: string;
         };
         Update: Partial<Database['public']['Tables']['games']['Insert']>;
       };
